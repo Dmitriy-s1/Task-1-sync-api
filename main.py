@@ -70,6 +70,20 @@ def check_database() -> None:
             print(f"количество записей в таблице posts: {p}")
 
 
+def fetch_top3_users_by_posts_count():
+    with closing(sqlite3.connect("app.db")) as connection:
+        with connection:
+            cursor = connection.cursor()
+
+            res = cursor.execute("""
+            SELECT name, COUNT(*) AS posts_count
+            FROM users
+            JOIN posts ON posts.userId = users.id
+            GROUP BY users.id, users.name
+            ORDER BY COUNT(*) DESC
+            LIMIT 3
+            """).fetchall()
+            print(res)
 
 
 if __name__ == "__main__":
@@ -77,4 +91,5 @@ if __name__ == "__main__":
     users = make_request(USERS_URL)
     posts = make_request(POSTS_URL)
     save_data_to_db(users, posts)
-    check_database()
+    #check_database()
+    fetch_top3_users_by_posts_count()
