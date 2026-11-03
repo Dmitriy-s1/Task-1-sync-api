@@ -1,5 +1,3 @@
-import email
-
 import requests
 import sqlite3
 from contextlib import closing
@@ -30,14 +28,13 @@ def init_database() -> None:
                 email TEXT NOT NULL
                 )
             """)
-            cursor.execute("""
-            CREATE TABLE IF NOT EXISTS posts 
+            cursor.execute("""CREATE TABLE IF NOT EXISTS posts 
                 (
                 id INTEGER NOT NULL PRIMARY KEY ,
-                user_id INTEGER NOT NULL,
-                FOREIGN KEY(user_id) REFERENCES users(id),
+                userId INTEGER NOT NULL,
                 title TEXT NOT NULL,
-                body TEXT NOT NULL
+                body TEXT NOT NULL,
+                FOREIGN KEY(userId) REFERENCES users(id)
                 )
             """)
 
@@ -46,6 +43,7 @@ def save_data_to_db(users:list, posts:list):
     with (closing(sqlite3.connect("app.db")) as connection):
         with connection:
             cursor = connection.cursor()
+            cursor.execute("PRAGMA foreign_keys = ON")
 
             cursor.executemany("""
             INSERT OR IGNORE INTO users(id, name, username, email) 
@@ -62,18 +60,21 @@ def save_data_to_db(users:list, posts:list):
             )
 
 
-
-
-
-
-
+def check_database() -> None:
+    with closing(sqlite3.connect("app.db")) as connection:
+        with connection:
+            cursor = connection.cursor()
+            u = cursor.execute("""SELECT COUNT(*) FROM users""").fetchone()[0]
+            p = cursor.execute("""SELECT COUNT(*) FROM posts""").fetchone()[0]
+            print(f"количество записей в таблице users: {u}")
+            print(f"количество записей в таблице posts: {p}")
 
 
 
 
 if __name__ == "__main__":
-    test1 = make_request(USERS_URL)
-    test2 = make_request(POSTS_URL)
-    print(len(test1))
-    print(test1[0]['name'])
-    print(len(test2))
+    init_database()
+    users = make_request(USERS_URL)
+    posts = make_request(POSTS_URL)
+    save_data_to_db(users, posts)
+    check_database()
