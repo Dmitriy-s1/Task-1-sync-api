@@ -4,7 +4,7 @@ from contextlib import closing
 
 USERS_URL = "https://jsonplaceholder.typicode.com/users"
 POSTS_URL = "https://jsonplaceholder.typicode.com/posts"
-
+DB_NAME = "app.db"
 
 def make_request(url:str) -> list :
     response = requests.get(url,timeout=5)
@@ -13,7 +13,7 @@ def make_request(url:str) -> list :
 
 
 def init_database() -> None:
-    with closing(sqlite3.connect("app.db")) as connection:
+    with closing(sqlite3.connect(DB_NAME)) as connection:
         with connection:
             cursor = connection.cursor()
             cursor.execute("PRAGMA foreign_keys = ON")
@@ -40,7 +40,7 @@ def init_database() -> None:
 
 
 def save_data_to_db(users:list, posts:list):
-    with (closing(sqlite3.connect("app.db")) as connection):
+    with (closing(sqlite3.connect(DB_NAME)) as connection):
         with connection:
             cursor = connection.cursor()
             cursor.execute("PRAGMA foreign_keys = ON")
@@ -61,7 +61,7 @@ def save_data_to_db(users:list, posts:list):
 
 
 def check_database() -> None:
-    with closing(sqlite3.connect("app.db")) as connection:
+    with closing(sqlite3.connect(DB_NAME)) as connection:
         with connection:
             cursor = connection.cursor()
             u = cursor.execute("""SELECT COUNT(*) FROM users""").fetchone()[0]
@@ -71,7 +71,7 @@ def check_database() -> None:
 
 
 def fetch_top3_users_by_posts_count():
-    with closing(sqlite3.connect("app.db")) as connection:
+    with closing(sqlite3.connect(DB_NAME)) as connection:
         with connection:
             cursor = connection.cursor()
 
